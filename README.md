@@ -14,3 +14,8 @@ Vamos usar o Stack Navigator,
 
 npx expo install @react-native-async-storage/async-storage
 para utilizarmos do async storage
+
+
+para rodar:
+
+npx expo start
