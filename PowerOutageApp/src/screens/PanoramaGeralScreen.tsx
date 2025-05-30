@@ -41,7 +41,7 @@ const PanoramaGeralScreen: React.FC<Props> = ({ navigation }) => {
       <View style={styles.buttonContainer}>
         <Button
           title="Adicionar Novo Evento"
-          onPress={() => navigation.navigate('AdicionarEditarEvento', {})}
+          onPress={() => navigation.navigate('FormularioEvento', {})}
         />
         <View style={{marginVertical: 5}} />
         <Button
