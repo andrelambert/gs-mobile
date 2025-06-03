@@ -27,6 +27,12 @@ interface ViaCepResponse {
   erro?: boolean;
 }
 
+// Interface para a resposta da API de geocodificação
+interface GeocodingResponse {
+  lat: string;
+  lon: string;
+}
+
 export default function NewEventScreen() {
   const router = useRouter();
   const { addEvent } = useEvents();
@@ -105,10 +111,42 @@ export default function NewEventScreen() {
       } else {
         // Formatar o endereço completo
         const fullAddress = `${data.logradouro}, ${data.bairro}, ${data.localidade} - ${data.uf}`;
-        setFormData(prevData => ({
-          ...prevData,
-          address: fullAddress
-        }));
+        
+        // Geocodificar o endereço para obter coordenadas
+        try {
+          const searchAddress = `${data.logradouro}, ${data.bairro}, ${data.localidade}, ${data.uf}, Brazil`;
+          const geocodeResponse = await fetch(
+            `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(searchAddress)}&format=json&limit=1`,
+            {
+              headers: {
+                'User-Agent': 'PowerOutageTracker/1.0'
+              }
+            }
+          );
+          
+          const geocodeData = await geocodeResponse.json();
+          
+          if (geocodeData && geocodeData.length > 0) {
+            const { lat, lon } = geocodeData[0];
+            setFormData(prevData => ({
+              ...prevData,
+              address: fullAddress,
+              latitude: parseFloat(lat),
+              longitude: parseFloat(lon)
+            }));
+          } else {
+            setFormData(prevData => ({
+              ...prevData,
+              address: fullAddress
+            }));
+          }
+        } catch (geocodeError) {
+          console.error('Erro ao geocodificar endereço:', geocodeError);
+          setFormData(prevData => ({
+            ...prevData,
+            address: fullAddress
+          }));
+        }
       }
     } catch (error) {
       setErrors({
@@ -166,7 +204,10 @@ export default function NewEventScreen() {
         // Adicionar o número ao endereço se fornecido
         location: formData.address ? 
           (formData.number ? `${formData.address}, ${formData.number}` : formData.address) : 
-          formData.location
+          formData.location,
+        // Incluir coordenadas se disponíveis
+        latitude: formData.latitude,
+        longitude: formData.longitude
       } as PowerOutageEvent;
       
       // Remover campos temporários que não fazem parte do modelo PowerOutageEvent

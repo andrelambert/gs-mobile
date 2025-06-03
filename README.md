@@ -14,8 +14,40 @@ O projeto é um aplicativo chamado "Power Outage Tracker", desenvolvido para ras
 
 ## Walkthrough
 
-- O aplicativo é configurado para funcionar em modo mobile e suporta dispositivos Android e iOS.
-- Continuar
+O aplicativo "Power Outage Tracker" possui as seguintes páginas principais:
+
+### 1. Panorama (Home)
+- Exibe uma visão geral dos eventos de falta de energia registrados
+- Apresenta estatísticas como número total de eventos, eventos ativos e resolvidos
+- Permite filtrar eventos por localização
+- Possibilita acessar detalhes de eventos específicos
+
+### 2. Localização
+- Oferece duas visualizações: lista e mapa
+- Na visualização em lista, exibe todas as localizações afetadas com contagem de eventos
+- Na visualização em mapa, mostra pins nos locais onde foram registradas ocorrências
+- Utiliza as coordenadas geográficas obtidas pelo CEP via API ViaCEP
+- Permite navegar para a lista de eventos ao clicar em uma localização
+
+### 3. Duração
+- Apresenta análises sobre o tempo médio de duração das quedas de energia
+- Categoriza os eventos por duração (curta, média, longa)
+- Exibe dados sobre impacto da duração dos eventos
+
+### 4. Prejuízos
+- Lista os prejuízos causados pelas faltas de energia
+- Mostra dados consolidados sobre tipos de prejuízos mais comuns
+- Permite registrar novos prejuízos relacionados a eventos
+
+### 5. Recomendações
+- Oferece dicas e recomendações para lidar com situações de falta de energia
+- Apresenta medidas preventivas para minimizar prejuízos
+- Inclui guias sobre o que fazer durante e após quedas de energia
+
+### Funcionalidades adicionais:
+- Tela de cadastro de novos eventos com busca automática de endereço por CEP
+- Armazenamento local dos dados utilizando AsyncStorage
+- Integração com APIs externas para obtenção de dados geográficos
 
 ## Dependências
 
@@ -26,7 +58,9 @@ O projeto é um aplicativo chamado "Power Outage Tracker", desenvolvido para ras
 - **expo-constants**: Acesso a constantes do sistema.
 - **expo-font**: Gerenciamento de fontes personalizadas.
 - **expo-linear-gradient**: Criação de gradientes lineares.
+- **expo-location**: Acesso e gerenciamento da localização do usuário.
 - **react-native-gesture-handler**: Manipulação de gestos.
+- **react-native-maps**: Implementação de mapas interativos.
 - **react-native-reanimated**: Animações fluidas.
 - **react-native-safe-area-context**: Gerenciamento de áreas seguras em dispositivos.
 - **react-native-screens**: Otimização de transições de tela.
@@ -57,8 +91,13 @@ O projeto é um aplicativo chamado "Power Outage Tracker", desenvolvido para ras
 
 Para iniciar o projeto, execute o seguinte comando:
 ```bash
-npx expo start
+npm run dev
 ```
+
+O aplicativo pode ser executado em:
+- Dispositivo físico através do aplicativo Expo Go (escaneando o QR code)
+- Emulador iOS ou Android
+- Navegador web (com funcionalidades limitadas)
 
 ## Licença
 

@@ -7,4 +7,6 @@ export interface PowerOutageEvent {
   cause?: string;
   damages?: string;
   createdAt: string;
+  latitude?: number;
+  longitude?: number;
 }
