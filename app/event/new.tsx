@@ -158,6 +158,7 @@ export default function NewEventScreen() {
                     mode="datetime"
                     display="spinner"
                     textColor={Colors.darkText}
+                    locale="pt-BR"
                     onChange={(event, date) => {
                       if (date) {
                         handleDateChange('startDate', date);
@@ -209,6 +210,7 @@ export default function NewEventScreen() {
                     mode="datetime"
                     display="spinner"
                     textColor={Colors.darkText}
+                    locale="pt-BR"
                     onChange={(event, date) => {
                       if (date) {
                         handleDateChange('endDate', date);
