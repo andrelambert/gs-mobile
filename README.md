@@ -1,21 +1,14 @@
-# gs-mobile
+# Global Solution - Mobile Development 
+
 Repositório para a entrega da disciplina Mobile Development para a Global Solution do primeiro semestre da 3ESPW (Engenharia de Software)
 
-### Bibliotecas/dependências que instalamos
+## Grupo
 
-npx expo install expo-crypto
+<li>André Lambert - RM 99148</li>
+<li>Felipe Cortez - RM 99750</li>
+<li>Lorenzo Ferreira - RM 97318</li>
 
-para gerar UUIDs para os IDs dos eventos.
+## Instruções
 
-npx expo install @react-navigation/native @react-navigation/stack
-npx expo install react-native-screens react-native-safe-area-context
-
-Vamos usar o Stack Navigator,
-
-npx expo install @react-native-async-storage/async-storage
-para utilizarmos do async storage
-
-
-para rodar:
-
-npx expo start
+<li> 1. Rode o comando npm install</li>
+<li>2. Rode o comando npx expo app</li>
