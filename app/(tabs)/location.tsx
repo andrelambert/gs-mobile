@@ -1,5 +1,5 @@
-import { View, Text, StyleSheet, FlatList, TouchableOpacity, Dimensions, Alert } from 'react-native';
-import { useState, useCallback, useEffect } from 'react';
+import { View, Text, StyleSheet, FlatList, TouchableOpacity, Dimensions, Alert, Animated } from 'react-native';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import { useFocusEffect } from '@react-navigation/native';
 import { useEvents } from '@/hooks/useEvents';
 import Colors from '@/constants/Colors';
@@ -17,6 +17,21 @@ export default function LocationScreen() {
   const [activeTab, setActiveTab] = useState('list'); // 'list' ou 'map'
   const [userLocation, setUserLocation] = useState(null);
   const [locationPermission, setLocationPermission] = useState(false);
+  const slideAnimation = useRef(new Animated.Value(0)).current;
+  
+  // Calcular o tamanho do container e do slider
+  const toggleContainerWidth = Dimensions.get('window').width - 32; // Subtrair margens
+  const toggleSliderWidth = (toggleContainerWidth - 8) / 2; // Metade do container menos padding
+
+  // Efeito para animar a transição entre tabs
+  useEffect(() => {
+    Animated.spring(slideAnimation, {
+      toValue: activeTab === 'list' ? 0 : 1,
+      useNativeDriver: true,
+      friction: 8,
+      tension: 60
+    }).start();
+  }, [activeTab, slideAnimation]);
 
   // Solicitar permissão de localização
   useEffect(() => {
@@ -157,24 +172,47 @@ export default function LocationScreen() {
     <View style={styles.container}>
       <View style={styles.header}>
         <Text style={styles.title}>Localizações Afetadas</Text>
-      </View>
+        
+        {/* Toggle moderno */}
+        <View style={styles.toggleContainer}>
+          <TouchableOpacity 
+            style={[styles.toggleOption, { width: toggleSliderWidth }]}
+            onPress={() => setActiveTab('list')}
+            activeOpacity={0.7}
+          >
+            <List size={18} color={activeTab === 'list' ? Colors.white : Colors.mediumText} />
+            <Text style={[
+              styles.toggleText,
+              activeTab === 'list' && styles.toggleActiveText
+            ]}>Lista</Text>
+          </TouchableOpacity>
+          <TouchableOpacity 
+            style={[styles.toggleOption, { width: toggleSliderWidth }]}
+            onPress={() => setActiveTab('map')}
+            activeOpacity={0.7}
+          >
+            <Map size={18} color={activeTab === 'map' ? Colors.white : Colors.mediumText} />
+            <Text style={[
+              styles.toggleText,
+              activeTab === 'map' && styles.toggleActiveText
+            ]}>Mapa</Text>
+          </TouchableOpacity>
 
-      {/* Tabs */}
-      <View style={styles.tabContainer}>
-        <TouchableOpacity 
-          style={[styles.tab, activeTab === 'list' && styles.activeTab]}
-          onPress={() => setActiveTab('list')}
-        >
-          <List size={20} color={activeTab === 'list' ? Colors.white : Colors.darkText} />
-          <Text style={[styles.tabText, activeTab === 'list' && styles.activeTabText]}>Lista</Text>
-        </TouchableOpacity>
-        <TouchableOpacity 
-          style={[styles.tab, activeTab === 'map' && styles.activeTab]}
-          onPress={() => setActiveTab('map')}
-        >
-          <Map size={20} color={activeTab === 'map' ? Colors.white : Colors.darkText} />
-          <Text style={[styles.tabText, activeTab === 'map' && styles.activeTabText]}>Mapa</Text>
-        </TouchableOpacity>
+          <Animated.View 
+            style={[
+              styles.toggleSlider,
+              {
+                width: toggleSliderWidth,
+                transform: [{ 
+                  translateX: slideAnimation.interpolate({
+                    inputRange: [0, 1],
+                    outputRange: [0, toggleSliderWidth]
+                  }) 
+                }]
+              }
+            ]}
+          />
+        </View>
       </View>
 
       {/* Tab Content */}
@@ -200,33 +238,54 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold',
     color: Colors.darkText,
+    marginBottom: 16,
   },
   list: {
     padding: 16,
   },
-  tabContainer: {
+  // Novos estilos para o toggle moderno
+  toggleContainer: {
+    height: 44,
+    backgroundColor: Colors.backgroundLight,
+    borderRadius: 12,
     flexDirection: 'row',
-    backgroundColor: Colors.white,
-    borderBottomWidth: 1,
-    borderBottomColor: Colors.lightGray,
+    position: 'relative',
+    marginHorizontal: 16,
+    padding: 4,
+    overflow: 'hidden',
+    justifyContent: 'space-between'
   },
-  tab: {
-    flex: 1,
+  toggleSlider: {
+    position: 'absolute',
+    top: 4,
+    left: 4,
+    height: 36,
+    backgroundColor: Colors.primary,
+    borderRadius: 8,
+    zIndex: -1,
+    shadowColor: Colors.primary,
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  toggleOption: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 12,
-    gap: 8,
+    zIndex: 1,
+    gap: 6,
+    height: 36,
   },
-  activeTab: {
-    backgroundColor: Colors.primary,
-  },
-  tabText: {
+  toggleText: {
     fontSize: 14,
-    fontWeight: '500',
-    color: Colors.darkText,
+    fontWeight: '600',
+    color: Colors.mediumText,
   },
-  activeTabText: {
+  toggleActiveText: {
     color: Colors.white,
   },
   content: {
