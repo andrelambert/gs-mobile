@@ -110,6 +110,7 @@ export default function NewEventScreen() {
             <TextInput
               style={[styles.input, errors.location ? styles.inputError : null]}
               placeholder="Ex: Bairro Jardim, São Paulo"
+              placeholderTextColor={Colors.darkGray}
               value={formData.location}
               onChangeText={(text) => handleChange('location', text)}
             />
@@ -173,6 +174,7 @@ export default function NewEventScreen() {
             <TextInput
               style={styles.input}
               placeholder="Ex: Tempestade com ventos fortes"
+              placeholderTextColor={Colors.darkGray}
               value={formData.cause}
               onChangeText={(text) => handleChange('cause', text)}
             />
@@ -183,6 +185,7 @@ export default function NewEventScreen() {
             <TextInput
               style={[styles.input, styles.textArea]}
               placeholder="Descreva os prejuízos observados..."
+              placeholderTextColor={Colors.darkGray}
               value={formData.damages}
               onChangeText={(text) => handleChange('damages', text)}
               multiline
@@ -339,15 +342,15 @@ const styles = StyleSheet.create({
     marginHorizontal: 4,
   },
   cancelButton: {
-    backgroundColor: Colors.lightGray,
+    backgroundColor: Colors.dangerLight,
     borderWidth: 1,
-    borderColor: Colors.mediumGray,
+    borderColor: Colors.danger,
   },
   submitButton: {
     backgroundColor: Colors.primary,
   },
   cancelButtonText: {
-    color: Colors.darkText,
+    color: Colors.danger,
     fontWeight: 'bold',
     fontSize: 16,
     marginLeft: 8,

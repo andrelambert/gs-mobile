@@ -14,7 +14,7 @@ export default function TabLayout() {
         tabBarInactiveTintColor: Colors.mediumText,
         tabBarStyle: [
           styles.tabBar,
-          { height: 70, paddingBottom: insets.bottom > 0 ? insets.bottom - 10 : 10 }
+          { height: 80, paddingBottom: insets.bottom > 0 ? insets.bottom - 10 : 15 }
         ],
         tabBarLabelStyle: styles.tabLabel,
         headerStyle: styles.header,
