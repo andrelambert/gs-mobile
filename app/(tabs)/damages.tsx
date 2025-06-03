@@ -6,11 +6,12 @@ import Colors from '@/constants/Colors';
 import DamageCard from '@/components/DamageCard';
 import EmptyState from '@/components/EmptyState';
 import { useRouter } from 'expo-router';
+import { PowerOutageEvent } from '@/types/event';
 
 export default function DamagesScreen() {
   const { events, fetchEvents } = useEvents();
   const router = useRouter();
-  const [eventsWithDamages, setEventsWithDamages] = useState([]);
+  const [eventsWithDamages, setEventsWithDamages] = useState<PowerOutageEvent[]>([]);
 
   useFocusEffect(
     useCallback(() => {
@@ -29,7 +30,7 @@ export default function DamagesScreen() {
     router.push('/event/new');
   };
 
-  const renderDamageItem = ({ item }) => (
+  const renderDamageItem = ({ item }: { item: PowerOutageEvent }) => (
     <DamageCard 
       event={item}
       onPress={() => router.push(`/event/${item.id}`)}

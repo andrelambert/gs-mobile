@@ -11,7 +11,7 @@ export default function TabLayout() {
     <Tabs
       screenOptions={{
         tabBarActiveTintColor: Colors.primary,
-        tabBarInactiveTintColor: Colors.gray,
+        tabBarInactiveTintColor: Colors.mediumText,
         tabBarStyle: [
           styles.tabBar,
           { height: 70, paddingBottom: insets.bottom > 0 ? insets.bottom - 10 : 10 }
@@ -20,8 +20,6 @@ export default function TabLayout() {
         headerStyle: styles.header,
         headerTitleStyle: styles.headerTitle,
         headerTintColor: Colors.white,
-        headerBackTitle: 'Voltar',
-        headerBackTitleVisible: true,
       }}>
       <Tabs.Screen
         name="index"
