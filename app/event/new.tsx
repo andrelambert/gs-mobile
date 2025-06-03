@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
-import { View, StyleSheet, ScrollView, TextInput, Text, TouchableOpacity, Alert } from 'react-native';
+import { View, StyleSheet, ScrollView, TextInput, Text, TouchableOpacity, Alert, Platform, Modal } from 'react-native';
 import { Stack, useRouter } from 'expo-router';
 import { useEvents } from '@/hooks/useEvents';
 import Colors from '@/constants/Colors';
-import DateTimePickerModal from '@/components/DateTimePickerModal';
+import DateTimePicker from '@react-native-community/datetimepicker';
 import { Check, X } from 'lucide-react-native';
 import { PowerOutageEvent } from '@/types/event';
 
@@ -132,16 +132,42 @@ export default function NewEventScreen() {
             {errors.startDate ? (
               <Text style={styles.errorText}>{errors.startDate}</Text>
             ) : null}
-            <DateTimePickerModal
-              isVisible={showStartDatePicker}
-              date={formData.startDate ? new Date(formData.startDate) : new Date()}
-              mode="datetime"
-              onConfirm={(date) => {
-                handleDateChange('startDate', date);
-                setShowStartDatePicker(false);
-              }}
-              onCancel={() => setShowStartDatePicker(false)}
-            />
+            <Modal
+              transparent={true}
+              visible={showStartDatePicker}
+              animationType="fade"
+              onRequestClose={() => setShowStartDatePicker(false)}
+            >
+              <View style={styles.modalOverlay}>
+                <View style={styles.modalContent}>
+                  <View style={styles.modalHeader}>
+                    <TouchableOpacity onPress={() => setShowStartDatePicker(false)}>
+                      <Text style={styles.modalButtonText}>Cancelar</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity onPress={() => {
+                      if (formData.startDate) {
+                        handleDateChange('startDate', new Date(formData.startDate));
+                      }
+                      setShowStartDatePicker(false);
+                    }}>
+                      <Text style={[styles.modalButtonText, styles.confirmButton]}>Confirmar</Text>
+                    </TouchableOpacity>
+                  </View>
+                  <DateTimePicker
+                    value={formData.startDate ? new Date(formData.startDate) : new Date()}
+                    mode="datetime"
+                    display="spinner"
+                    textColor={Colors.darkText}
+                    onChange={(event, date) => {
+                      if (date) {
+                        handleDateChange('startDate', date);
+                      }
+                    }}
+                    style={styles.picker}
+                  />
+                </View>
+              </View>
+            </Modal>
           </View>
 
           <View style={styles.formGroup}>
@@ -157,16 +183,42 @@ export default function NewEventScreen() {
             {errors.endDate ? (
               <Text style={styles.errorText}>{errors.endDate}</Text>
             ) : null}
-            <DateTimePickerModal
-              isVisible={showEndDatePicker}
-              date={formData.endDate ? new Date(formData.endDate) : new Date()}
-              mode="datetime"
-              onConfirm={(date) => {
-                handleDateChange('endDate', date);
-                setShowEndDatePicker(false);
-              }}
-              onCancel={() => setShowEndDatePicker(false)}
-            />
+            <Modal
+              transparent={true}
+              visible={showEndDatePicker}
+              animationType="fade"
+              onRequestClose={() => setShowEndDatePicker(false)}
+            >
+              <View style={styles.modalOverlay}>
+                <View style={styles.modalContent}>
+                  <View style={styles.modalHeader}>
+                    <TouchableOpacity onPress={() => setShowEndDatePicker(false)}>
+                      <Text style={styles.modalButtonText}>Cancelar</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity onPress={() => {
+                      if (formData.endDate) {
+                        handleDateChange('endDate', new Date(formData.endDate));
+                      }
+                      setShowEndDatePicker(false);
+                    }}>
+                      <Text style={[styles.modalButtonText, styles.confirmButton]}>Confirmar</Text>
+                    </TouchableOpacity>
+                  </View>
+                  <DateTimePicker
+                    value={formData.endDate ? new Date(formData.endDate) : new Date()}
+                    mode="datetime"
+                    display="spinner"
+                    textColor={Colors.darkText}
+                    onChange={(event, date) => {
+                      if (date) {
+                        handleDateChange('endDate', date);
+                      }
+                    }}
+                    style={styles.picker}
+                  />
+                </View>
+              </View>
+            </Modal>
           </View>
 
           <View style={styles.formGroup}>
@@ -360,5 +412,33 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     fontSize: 16,
     marginLeft: 8,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'flex-end',
+  },
+  modalContent: {
+    backgroundColor: Colors.white,
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    paddingBottom: Platform.OS === 'ios' ? 40 : 20,
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    padding: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.lightGray,
+  },
+  modalButtonText: {
+    fontSize: 16,
+    color: Colors.primary,
+  },
+  confirmButton: {
+    fontWeight: 'bold',
+  },
+  picker: {
+    height: 200,
   },
 });
