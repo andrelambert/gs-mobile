@@ -199,6 +199,8 @@ export default function NewEventScreen() {
                     <TouchableOpacity onPress={() => {
                       if (formData.endDate) {
                         handleDateChange('endDate', new Date(formData.endDate));
+                      } else {
+                        handleDateChange('endDate', new Date());
                       }
                       setShowEndDatePicker(false);
                     }}>
