@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, TouchableOpacity, Animated } from 'react-native
 import { PowerOutageEvent } from '@/types/event';
 import Colors from '@/constants/Colors';
 import { formatDate, calculateDuration } from '@/utils/dateUtils';
-import { MapPin, Clock, Calendar, CreditCard as Edit2, Trash2 } from 'lucide-react-native';
+import { MapPin, Clock, Calendar, Pencil, Trash2 } from 'lucide-react-native';
 import StatusBadge from './StatusBadge';
 import { GestureHandlerRootView, Swipeable } from 'react-native-gesture-handler';
 
@@ -16,9 +16,9 @@ interface EventCardProps {
 
 export default function EventCard({ event, onPress, onEdit, onDelete }: EventCardProps) {
   const duration = calculateDuration(event.startDate, event.endDate);
-  const swipeableRef = useRef(null);
+  const swipeableRef = useRef<Swipeable | null>(null);
 
-  const renderRightActions = (progress, dragX) => {
+  const renderRightActions = (progress: Animated.AnimatedInterpolation<number>, dragX: Animated.AnimatedInterpolation<number>) => {
     const scale = dragX.interpolate({
       inputRange: [-100, 0],
       outputRange: [1, 0],
@@ -34,7 +34,7 @@ export default function EventCard({ event, onPress, onEdit, onDelete }: EventCar
             onEdit();
           }}
         >
-          <Edit2 size={24} color={Colors.white} />
+          <Pencil size={24} color={Colors.white} />
         </TouchableOpacity>
         <TouchableOpacity
           style={[styles.actionButton, styles.deleteButton]}
@@ -54,12 +54,16 @@ export default function EventCard({ event, onPress, onEdit, onDelete }: EventCar
       <Swipeable
         ref={swipeableRef}
         renderRightActions={renderRightActions}
-        rightThreshold={40}
+        rightThreshold={50}
+        friction={2}
+        overshootFriction={6}
+        enableTrackpadTwoFingerGesture
       >
         <TouchableOpacity 
           style={styles.container}
           onPress={onPress}
           activeOpacity={0.7}
+          delayPressIn={80}
         >
           <View style={styles.header}>
             <View style={styles.row}>
@@ -147,6 +151,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: 16,
+    overflow: 'hidden',
   },
   actionButton: {
     justifyContent: 'center',
@@ -156,8 +161,12 @@ const styles = StyleSheet.create({
   },
   editButton: {
     backgroundColor: Colors.warning,
+    borderTopRightRadius: 0,
+    borderBottomRightRadius: 0,
   },
   deleteButton: {
     backgroundColor: Colors.danger,
+    borderTopRightRadius: 8,
+    borderBottomRightRadius: 8,
   },
 });

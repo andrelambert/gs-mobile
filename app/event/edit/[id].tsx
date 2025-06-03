@@ -97,7 +97,7 @@ export default function EditEventScreen() {
     } else {
       Alert.alert(
         "Erro",
-        "Por favor, corrija os erros no formulário."
+        "Por favor, verifique os campos obrigatórios."
       );
     }
   };
@@ -118,7 +118,7 @@ export default function EditEventScreen() {
             <Text style={styles.label}>Localização*</Text>
             <TextInput
               style={[styles.input, errors.location ? styles.inputError : null]}
-              placeholder="Ex: Bairro Jardim, São Paulo"
+              placeholder="Ex: Jardim Paulista, São Paulo"
               value={formData.location}
               onChangeText={(text) => handleChange('location', text)}
             />

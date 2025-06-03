@@ -88,7 +88,7 @@ export default function NewEventScreen() {
     } else {
       Alert.alert(
         "Erro",
-        "Por favor, corrija os erros no formulário."
+        "Por favor, verifique os campos obrigatórios."
       );
     }
   };
@@ -109,7 +109,7 @@ export default function NewEventScreen() {
             <Text style={styles.label}>Localização*</Text>
             <TextInput
               style={[styles.input, errors.location ? styles.inputError : null]}
-              placeholder="Ex: Bairro Jardim, São Paulo"
+              placeholder="Ex: Jardim Paulista, São Paulo"
               placeholderTextColor={Colors.darkGray}
               value={formData.location}
               onChangeText={(text) => handleChange('location', text)}
@@ -281,7 +281,7 @@ export default function NewEventScreen() {
               style={[styles.button, styles.cancelButton]} 
               onPress={() => router.back()}
             >
-              <X size={20} color={Colors.darkText} />
+              <X size={20} color={Colors.danger} />
               <Text style={styles.cancelButtonText}>Cancelar</Text>
             </TouchableOpacity>
             <TouchableOpacity 
