@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, StyleSheet, ScrollView, TextInput, Text, TouchableOpacity, Alert, Platform, Modal } from 'react-native';
+import { View, StyleSheet, ScrollView, TextInput, Text, TouchableOpacity, Alert, Platform, Modal, ActivityIndicator, KeyboardType } from 'react-native';
 import { Stack, useRouter } from 'expo-router';
 import { useEvents } from '@/hooks/useEvents';
 import Colors from '@/constants/Colors';
@@ -7,25 +7,73 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 import { Check, X } from 'lucide-react-native';
 import { PowerOutageEvent } from '@/types/event';
 
+// Função para formatar o CEP (99999-999)
+const formatCep = (cep: string): string => {
+  cep = cep.replace(/\D/g, ''); // Remove caracteres não numéricos
+  if (cep.length > 5) {
+    return `${cep.substring(0, 5)}-${cep.substring(5, 8)}`;
+  }
+  return cep;
+};
+
+// Interface para a resposta da API ViaCEP
+interface ViaCepResponse {
+  cep: string;
+  logradouro: string;
+  complemento: string;
+  bairro: string;
+  localidade: string;
+  uf: string;
+  erro?: boolean;
+}
+
 export default function NewEventScreen() {
   const router = useRouter();
   const { addEvent } = useEvents();
-  const [formData, setFormData] = useState<Partial<PowerOutageEvent>>({
+  const [formData, setFormData] = useState<Partial<PowerOutageEvent & { address: string; number: string }>>({
     location: '',
     startDate: new Date().toISOString(),
     status: 'active',
     cause: '',
-    damages: ''
+    damages: '',
+    address: '',
+    number: ''
   });
   const [showStartDatePicker, setShowStartDatePicker] = useState(false);
   const [showEndDatePicker, setShowEndDatePicker] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [isLoadingCep, setIsLoadingCep] = useState(false);
 
   const handleChange = (field: string, value: string) => {
-    setFormData({
-      ...formData,
+    if (field === 'location') {
+      // Para o campo de CEP, formatar e limitar a 9 caracteres (incluindo o hífen)
+      value = formatCep(value);
+      if (value.length > 9) return;
+      
+      // Buscar CEP quando atingir 8 dígitos (sem considerar o hífen)
+      const cleanValue = value.replace(/\D/g, '');
+      if (cleanValue.length === 8) {
+        // Armazenar o valor atual antes de buscar
+        setFormData(prevData => ({
+          ...prevData,
+          [field]: value
+        }));
+        
+        // Iniciar a busca do CEP
+        fetchAddressByCep(value);
+        return;
+      }
+    }
+    
+    if (field === 'number') {
+      // Garantir que apenas números sejam aceitos no campo número
+      value = value.replace(/\D/g, '');
+    }
+    
+    setFormData(prevData => ({
+      ...prevData,
       [field]: value
-    });
+    }));
     
     // Clear error for this field if it exists
     if (errors[field]) {
@@ -33,6 +81,42 @@ export default function NewEventScreen() {
         ...errors,
         [field]: ''
       });
+    }
+  };
+
+  const fetchAddressByCep = async (cep: string) => {
+    const cleanCep = cep.replace(/\D/g, '');
+    if (cleanCep.length !== 8) return;
+    
+    setIsLoadingCep(true);
+    try {
+      const response = await fetch(`https://viacep.com.br/ws/${cleanCep}/json/`);
+      const data: ViaCepResponse = await response.json();
+      
+      if (data.erro) {
+        setErrors({
+          ...errors,
+          location: 'CEP não encontrado'
+        });
+        setFormData({
+          ...formData,
+          address: ''
+        });
+      } else {
+        // Formatar o endereço completo
+        const fullAddress = `${data.logradouro}, ${data.bairro}, ${data.localidade} - ${data.uf}`;
+        setFormData(prevData => ({
+          ...prevData,
+          address: fullAddress
+        }));
+      }
+    } catch (error) {
+      setErrors({
+        ...errors,
+        location: 'Erro ao buscar CEP'
+      });
+    } finally {
+      setIsLoadingCep(false);
     }
   };
 
@@ -56,8 +140,8 @@ export default function NewEventScreen() {
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
     
-    if (!formData.location || formData.location.trim() === '') {
-      newErrors.location = 'A localização é obrigatória';
+    if (!formData.location || formData.location.replace(/\D/g, '').length !== 8) {
+      newErrors.location = 'CEP válido é obrigatório';
     }
     
     if (!formData.startDate) {
@@ -74,11 +158,22 @@ export default function NewEventScreen() {
 
   const handleSubmit = () => {
     if (validateForm()) {
-      addEvent({
+      // Preparar os dados para salvar
+      const eventData: PowerOutageEvent = {
         ...formData,
         id: Date.now().toString(),
-        createdAt: new Date().toISOString()
-      } as PowerOutageEvent);
+        createdAt: new Date().toISOString(),
+        // Adicionar o número ao endereço se fornecido
+        location: formData.address ? 
+          (formData.number ? `${formData.address}, ${formData.number}` : formData.address) : 
+          formData.location
+      } as PowerOutageEvent;
+      
+      // Remover campos temporários que não fazem parte do modelo PowerOutageEvent
+      delete (eventData as any).address;
+      delete (eventData as any).number;
+      
+      addEvent(eventData);
       
       Alert.alert(
         "Sucesso",
@@ -106,18 +201,54 @@ export default function NewEventScreen() {
       <View style={styles.container}>
         <ScrollView style={styles.scrollView} contentContainerStyle={styles.content}>
           <View style={styles.formGroup}>
-            <Text style={styles.label}>Localização*</Text>
-            <TextInput
-              style={[styles.input, errors.location ? styles.inputError : null]}
-              placeholder="Ex: Jardim Paulista, São Paulo"
-              placeholderTextColor={Colors.darkGray}
-              value={formData.location}
-              onChangeText={(text) => handleChange('location', text)}
-            />
+            <Text style={styles.label}>CEP*</Text>
+            <View style={styles.cepInputContainer}>
+              <TextInput
+                style={[styles.input, styles.cepInput, errors.location ? styles.inputError : null]}
+                placeholder="Digite o CEP da localização"
+                placeholderTextColor={Colors.darkGray}
+                value={formData.location}
+                onChangeText={(text) => handleChange('location', text)}
+                keyboardType="numeric"
+                maxLength={9}
+              />
+              {isLoadingCep && (
+                <ActivityIndicator 
+                  size="small" 
+                  color={Colors.primary} 
+                  style={styles.cepLoader} 
+                />
+              )}
+            </View>
             {errors.location ? (
               <Text style={styles.errorText}>{errors.location}</Text>
             ) : null}
           </View>
+
+          {formData.address ? (
+            <>
+              <View style={styles.formGroup}>
+                <Text style={styles.label}>Endereço</Text>
+                <TextInput
+                  style={[styles.input, styles.disabledInput]}
+                  value={formData.address}
+                  editable={false}
+                />
+              </View>
+              
+              <View style={styles.formGroup}>
+                <Text style={styles.label}>Número (opcional)</Text>
+                <TextInput
+                  style={styles.input}
+                  placeholder="Digite o número"
+                  placeholderTextColor={Colors.darkGray}
+                  value={formData.number}
+                  onChangeText={(text) => handleChange('number', text)}
+                  keyboardType="numeric"
+                />
+              </View>
+            </>
+          ) : null}
 
           <View style={styles.formGroup}>
             <Text style={styles.label}>Data de Início*</Text>
@@ -444,5 +575,22 @@ const styles = StyleSheet.create({
   },
   picker: {
     height: 200,
+  },
+  cepInputContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    position: 'relative',
+  },
+  cepInput: {
+    flex: 1,
+    width: '100%',
+  },
+  cepLoader: {
+    position: 'absolute',
+    right: 12,
+  },
+  disabledInput: {
+    backgroundColor: Colors.lightGray,
+    color: Colors.darkGray,
   },
 });
