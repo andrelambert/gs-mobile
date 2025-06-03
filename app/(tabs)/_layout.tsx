@@ -21,6 +21,7 @@ export default function TabLayout() {
         headerTitleStyle: styles.headerTitle,
         headerTintColor: Colors.white,
         headerBackTitle: 'Voltar',
+        headerBackTitleVisible: true,
       }}>
       <Tabs.Screen
         name="index"

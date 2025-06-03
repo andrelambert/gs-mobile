@@ -10,7 +10,11 @@ export default function RootLayout() {
   return (
     <EventProvider>
       <>
-        <Stack screenOptions={{ headerShown: false }}>
+        <Stack screenOptions={{
+          headerShown: false,
+          headerBackTitle: 'Voltar',
+          headerBackTitleVisible: true,
+        }}>
           <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
           <Stack.Screen name="+not-found" />
         </Stack>
