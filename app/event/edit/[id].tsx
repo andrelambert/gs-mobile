@@ -59,6 +59,18 @@ export default function EditEventScreen() {
 
   const handleDateChange = (field: 'startDate' | 'endDate', date: Date | null) => {
     if (date) {
+      const now = new Date();
+      
+      // Verificar se a data selecionada é futura
+      if (date > now) {
+        Alert.alert(
+          "Data Inválida",
+          "Não é possível selecionar uma data futura. Por favor, selecione uma data e horário que já ocorreram.",
+          [{ text: "OK" }]
+        );
+        return;
+      }
+      
       setFormData({
         ...formData,
         [field]: date.toISOString()
@@ -173,6 +185,7 @@ export default function EditEventScreen() {
               isVisible={showStartDatePicker}
               date={formData.startDate ? new Date(formData.startDate) : new Date()}
               mode="datetime"
+              maximumDate={new Date()}
               onConfirm={(date) => {
                 handleDateChange('startDate', date);
                 setShowStartDatePicker(false);
@@ -209,6 +222,7 @@ export default function EditEventScreen() {
               isVisible={showEndDatePicker}
               date={formData.endDate ? new Date(formData.endDate) : new Date()}
               mode="datetime"
+              maximumDate={new Date()}
               onConfirm={(date) => {
                 handleDateChange('endDate', date);
                 setShowEndDatePicker(false);

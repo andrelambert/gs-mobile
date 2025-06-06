@@ -9,6 +9,7 @@ interface DateTimePickerModalProps {
   mode: 'date' | 'time' | 'datetime';
   onConfirm: (date: Date) => void;
   onCancel: () => void;
+  maximumDate?: Date;
 }
 
 export default function DateTimePickerModal({
@@ -16,7 +17,8 @@ export default function DateTimePickerModal({
   date,
   mode,
   onConfirm,
-  onCancel
+  onCancel,
+  maximumDate
 }: DateTimePickerModalProps) {
   const [selectedDate, setSelectedDate] = React.useState(date);
   const [currentMode, setCurrentMode] = React.useState<'date' | 'time'>(
@@ -46,6 +48,7 @@ export default function DateTimePickerModal({
         mode={currentMode}
         is24Hour={true}
         display="default"
+        maximumDate={maximumDate}
         onChange={(event, date) => {
           if (event.type === 'dismissed') {
             onCancel();
@@ -88,6 +91,7 @@ export default function DateTimePickerModal({
             mode={currentMode}
             is24Hour={true}
             display="spinner"
+            maximumDate={maximumDate}
             onChange={onChange}
             style={styles.picker}
           />

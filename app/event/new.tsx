@@ -168,6 +168,18 @@ export default function NewEventScreen() {
 
   const handleDateChange = (field: 'startDate' | 'endDate', date: Date | null) => {
     if (date) {
+      const now = new Date();
+      
+      // Verificar se a data selecionada é futura
+      if (date > now) {
+        Alert.alert(
+          "Data Inválida",
+          "Não é possível selecionar uma data futura. Por favor, selecione uma data e horário que já ocorreram.",
+          [{ text: "OK" }]
+        );
+        return;
+      }
+      
       setFormData({
         ...formData,
         [field]: date.toISOString()
@@ -360,6 +372,7 @@ export default function NewEventScreen() {
                     display="spinner"
                     textColor={Colors.darkText}
                     locale="pt-BR"
+                    maximumDate={new Date()}
                     onChange={(event, date) => {
                       if (date) {
                         handleDateChange('startDate', date);
@@ -425,6 +438,7 @@ export default function NewEventScreen() {
                     display="spinner"
                     textColor={Colors.darkText}
                     locale="pt-BR"
+                    maximumDate={new Date()}
                     onChange={(event, date) => {
                       if (date) {
                         handleDateChange('endDate', date);
