@@ -91,7 +91,7 @@ O aplicativo "Power Outage Tracker" possui as seguintes páginas principais:
 
 Para iniciar o projeto, execute o seguinte comando:
 ```bash
-npm run dev
+npx expo start
 ```
 
 O aplicativo pode ser executado em:
