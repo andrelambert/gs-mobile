@@ -12,6 +12,9 @@ Repositório para a entrega da disciplina Mobile Development para a Global Solut
 
 O projeto é um aplicativo chamado "Power Outage Tracker", desenvolvido para rastrear e gerenciar quedas de energia. Ele utiliza o Expo para facilitar o desenvolvimento e a execução em múltiplas plataformas.
 
+## Vídeo demonstrativo:
+https://youtu.be/lv19Ss86qrY?si=DXwJPGBjHtuPQxzc
+
 ## Walkthrough
 
 O aplicativo "Power Outage Tracker" possui as seguintes páginas principais:
