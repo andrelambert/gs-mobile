@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, ScrollView, TextInput, Text, TouchableOpacity, Alert } from 'react-native';
+import { View, StyleSheet, ScrollView, TextInput, Text, TouchableOpacity, Alert, KeyboardAvoidingView, Platform } from 'react-native';
 import { Stack, useRouter, useLocalSearchParams } from 'expo-router';
 import { useEvents } from '@/hooks/useEvents';
 import Colors from '@/constants/Colors';
@@ -21,6 +21,7 @@ export default function EditEventScreen() {
   const [showStartDatePicker, setShowStartDatePicker] = useState(false);
   const [showEndDatePicker, setShowEndDatePicker] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [endDateWarning, setEndDateWarning] = useState('');
 
   useEffect(() => {
     if (id) {
@@ -35,6 +36,13 @@ export default function EditEventScreen() {
   }, [id, getEventById, router]);
 
   const handleChange = (field: string, value: string) => {
+    if (field === 'status') {
+      // Limpar aviso da data de fim quando mudar para resolvido
+      if (value === 'resolved') {
+        setEndDateWarning('');
+      }
+    }
+    
     setFormData({
       ...formData,
       [field]: value
@@ -66,6 +74,14 @@ export default function EditEventScreen() {
     }
   };
 
+  const handleEndDatePress = () => {
+    if (formData.status === 'active') {
+      setEndDateWarning('Este campo só é necessário para status "Resolvido"');
+    } else {
+      setShowEndDatePicker(true);
+    }
+  };
+
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
     
@@ -75,6 +91,10 @@ export default function EditEventScreen() {
     
     if (!formData.startDate) {
       newErrors.startDate = 'A data de início é obrigatória';
+    }
+    
+    if (formData.status === 'resolved' && !formData.endDate) {
+      newErrors.endDate = 'A data de fim é obrigatória para eventos resolvidos';
     }
     
     if (formData.endDate && new Date(formData.endDate) < new Date(formData.startDate!)) {
@@ -112,8 +132,17 @@ export default function EditEventScreen() {
           headerStyle: { backgroundColor: Colors.primary },
         }} 
       />
-      <View style={styles.container}>
-        <ScrollView style={styles.scrollView} contentContainerStyle={styles.content}>
+      <KeyboardAvoidingView 
+        style={styles.container}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 100 : 0}
+      >
+        <ScrollView 
+          style={styles.scrollView} 
+          contentContainerStyle={styles.content}
+          showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled"
+        >
           <View style={styles.formGroup}>
             <Text style={styles.label}>Localização*</Text>
             <TextInput
@@ -153,17 +182,28 @@ export default function EditEventScreen() {
           </View>
 
           <View style={styles.formGroup}>
-            <Text style={styles.label}>Data de Fim (opcional)</Text>
+            <Text style={styles.label}>Data de Fim</Text>
             <TouchableOpacity 
-              style={[styles.input, styles.dateInput, errors.endDate ? styles.inputError : null]} 
-              onPress={() => setShowEndDatePicker(true)}
+              style={[
+                styles.input, 
+                styles.dateInput, 
+                formData.status === 'active' && styles.disabledInput,
+                errors.endDate ? styles.inputError : null
+              ]} 
+              onPress={handleEndDatePress}
             >
-              <Text style={styles.dateText}>
+              <Text style={[
+                styles.dateText,
+                formData.status === 'active' && styles.disabledText
+              ]}>
                 {formData.endDate ? new Date(formData.endDate).toLocaleString() : 'Selecionar data'}
               </Text>
             </TouchableOpacity>
             {errors.endDate ? (
               <Text style={styles.errorText}>{errors.endDate}</Text>
+            ) : null}
+            {endDateWarning ? (
+              <Text style={styles.warningText}>{endDateWarning}</Text>
             ) : null}
             <DateTimePickerModal
               isVisible={showEndDatePicker}
@@ -213,7 +253,7 @@ export default function EditEventScreen() {
                 <Text style={[
                   styles.statusText,
                   formData.status === 'active' && styles.statusActiveText
-                ]}>Ativo</Text>
+                ]}>Em andamento</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 style={[
@@ -247,7 +287,7 @@ export default function EditEventScreen() {
             </TouchableOpacity>
           </View>
         </ScrollView>
-      </View>
+      </KeyboardAvoidingView>
     </>
   );
 }
@@ -262,6 +302,7 @@ const styles = StyleSheet.create({
   },
   content: {
     padding: 16,
+    paddingBottom: 60,
   },
   formGroup: {
     marginBottom: 16,
@@ -366,5 +407,17 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     fontSize: 16,
     marginLeft: 8,
+  },
+  disabledInput: {
+    backgroundColor: Colors.lightGray,
+    color: Colors.darkGray,
+  },
+  disabledText: {
+    color: Colors.darkGray,
+  },
+  warningText: {
+    color: Colors.warning,
+    fontSize: 14,
+    marginTop: 4,
   },
 });

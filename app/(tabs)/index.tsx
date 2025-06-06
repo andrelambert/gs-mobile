@@ -61,7 +61,7 @@ export default function PanoramaScreen() {
       <View style={styles.statDivider} />
       <View style={styles.statItem}>
         <Text style={styles.statValue}>{activeEvents.length}</Text>
-        <Text style={styles.statLabel}>Ativos</Text>
+        <Text style={styles.statLabel}>Em andamento</Text>
       </View>
       <View style={styles.statDivider} />
       <View style={styles.statItem}>

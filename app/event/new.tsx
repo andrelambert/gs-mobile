@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, StyleSheet, ScrollView, TextInput, Text, TouchableOpacity, Alert, Platform, Modal, ActivityIndicator, KeyboardType } from 'react-native';
+import { View, StyleSheet, ScrollView, TextInput, Text, TouchableOpacity, Alert, Platform, Modal, ActivityIndicator, KeyboardType, KeyboardAvoidingView } from 'react-native';
 import { Stack, useRouter } from 'expo-router';
 import { useEvents } from '@/hooks/useEvents';
 import Colors from '@/constants/Colors';
@@ -49,6 +49,7 @@ export default function NewEventScreen() {
   const [showEndDatePicker, setShowEndDatePicker] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isLoadingCep, setIsLoadingCep] = useState(false);
+  const [endDateWarning, setEndDateWarning] = useState('');
 
   const handleChange = (field: string, value: string) => {
     if (field === 'location') {
@@ -74,6 +75,13 @@ export default function NewEventScreen() {
     if (field === 'number') {
       // Garantir que apenas números sejam aceitos no campo número
       value = value.replace(/\D/g, '');
+    }
+    
+    if (field === 'status') {
+      // Limpar aviso da data de fim quando mudar para resolvido
+      if (value === 'resolved') {
+        setEndDateWarning('');
+      }
     }
     
     setFormData(prevData => ({
@@ -175,6 +183,14 @@ export default function NewEventScreen() {
     }
   };
 
+  const handleEndDatePress = () => {
+    if (formData.status === 'active') {
+      setEndDateWarning('Este campo só é necessário para status "Resolvido"');
+    } else {
+      setShowEndDatePicker(true);
+    }
+  };
+
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
     
@@ -184,6 +200,10 @@ export default function NewEventScreen() {
     
     if (!formData.startDate) {
       newErrors.startDate = 'A data de início é obrigatória';
+    }
+    
+    if (formData.status === 'resolved' && !formData.endDate) {
+      newErrors.endDate = 'A data de fim é obrigatória para eventos resolvidos';
     }
     
     if (formData.endDate && new Date(formData.endDate) < new Date(formData.startDate!)) {
@@ -239,8 +259,17 @@ export default function NewEventScreen() {
           headerStyle: { backgroundColor: Colors.primary },
         }} 
       />
-      <View style={styles.container}>
-        <ScrollView style={styles.scrollView} contentContainerStyle={styles.content}>
+      <KeyboardAvoidingView 
+        style={styles.container}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 100 : 0}
+      >
+        <ScrollView 
+          style={styles.scrollView} 
+          contentContainerStyle={styles.content}
+          showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled"
+        >
           <View style={styles.formGroup}>
             <Text style={styles.label}>CEP*</Text>
             <View style={styles.cepInputContainer}>
@@ -344,17 +373,28 @@ export default function NewEventScreen() {
           </View>
 
           <View style={styles.formGroup}>
-            <Text style={styles.label}>Data de Fim (opcional)</Text>
+            <Text style={styles.label}>Data de Fim</Text>
             <TouchableOpacity 
-              style={[styles.input, styles.dateInput, errors.endDate ? styles.inputError : null]} 
-              onPress={() => setShowEndDatePicker(true)}
+              style={[
+                styles.input, 
+                styles.dateInput, 
+                formData.status === 'active' && styles.disabledInput,
+                errors.endDate ? styles.inputError : null
+              ]} 
+              onPress={handleEndDatePress}
             >
-              <Text style={styles.dateText}>
+              <Text style={[
+                styles.dateText,
+                formData.status === 'active' && styles.disabledText
+              ]}>
                 {formData.endDate ? new Date(formData.endDate).toLocaleString() : 'Selecionar data'}
               </Text>
             </TouchableOpacity>
             {errors.endDate ? (
               <Text style={styles.errorText}>{errors.endDate}</Text>
+            ) : null}
+            {endDateWarning ? (
+              <Text style={styles.warningText}>{endDateWarning}</Text>
             ) : null}
             <Modal
               transparent={true}
@@ -435,7 +475,7 @@ export default function NewEventScreen() {
                 <Text style={[
                   styles.statusText,
                   formData.status === 'active' && styles.statusActiveText
-                ]}>Ativo</Text>
+                ]}>Em andamento</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 style={[
@@ -469,7 +509,7 @@ export default function NewEventScreen() {
             </TouchableOpacity>
           </View>
         </ScrollView>
-      </View>
+      </KeyboardAvoidingView>
     </>
   );
 }
@@ -484,7 +524,7 @@ const styles = StyleSheet.create({
   },
   content: {
     padding: 16,
-    paddingBottom: 40,
+    paddingBottom: 60,
   },
   formGroup: {
     marginBottom: 16,
@@ -634,5 +674,13 @@ const styles = StyleSheet.create({
   disabledInput: {
     backgroundColor: Colors.lightGray,
     color: Colors.darkGray,
+  },
+  disabledText: {
+    color: Colors.darkGray,
+  },
+  warningText: {
+    color: Colors.warning,
+    fontSize: 14,
+    marginTop: 4,
   },
 });

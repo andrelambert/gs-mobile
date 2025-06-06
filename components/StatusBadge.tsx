@@ -16,7 +16,7 @@ export default function StatusBadge({ status }: StatusBadgeProps) {
         styles.text,
         status === 'active' ? styles.activeText : styles.resolvedText
       ]}>
-        {status === 'active' ? 'Ativo' : 'Resolvido'}
+        {status === 'active' ? 'Em andamento' : 'Resolvido'}
       </Text>
     </View>
   );
